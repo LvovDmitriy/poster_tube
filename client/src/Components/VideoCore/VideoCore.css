@@ -1,0 +1,14 @@
+.videoPart {
+    /*border: 2px dashed #95a5a6;*/
+    margin-top: 20px;
+}
+
+.sidebar {
+    margin-top: 20px;
+}
+
+.sidebar img {
+    display: block;
+    width: 100%;
+    height: auto;
+}

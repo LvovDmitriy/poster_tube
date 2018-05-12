@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import "../node_modules/video-react/dist/video-react.css";
 import './App.css';
-import Header from './Header.js';
-import VideoCore from './VideoCore.js';
+import Header from './Components/Header/Header.js';
+import VideoCore from './Components/VideoCore/VideoCore.js';
 
 class App extends Component {
 

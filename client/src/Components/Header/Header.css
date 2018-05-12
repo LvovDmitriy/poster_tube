@@ -1,0 +1,18 @@
+.appHeader {
+    padding: 1px;
+    height: 60px;
+    text-align: left;
+    background-color: #161515;
+    vertical-align: center;
+}
+
+.appHeader h1 {
+    margin: 0.3em;
+    font-size: 1.8em;
+    color: #ECE6E6;
+    font-family: Roboto;
+}
+
+.blueHeader {
+    color: #83A6F9;
+}
