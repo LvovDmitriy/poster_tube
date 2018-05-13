@@ -1,14 +1,70 @@
 .videoPart {
     /*border: 2px dashed #95a5a6;*/
-    margin-top: 20px;
+    margin-top: 15px;
+    /*font-size: 3em;*/
+    /*font-family: 'Roboto', sans-serif;*/
+}
+
+.videoPart h2 {
+    margin-top: 14px;
+    font-size: 1.6em;
+    font-family: 'Roboto:300', sans-serif;
+}
+
+.videoPart .downloadBtn {
+    margin-top: 3px;
+    font-family: 'Roboto:400', sans-serif;
 }
 
 .sidebar {
-    margin-top: 20px;
+    font-family: 'Roboto:400', sans-serif;
+}
+
+.sidebar .sideDuration {
+    border-radius: 3px;
+    font-size: 0.85em;
+    position: absolute;
+    display: inline-block;
+    padding: 2px 7px;
+    bottom: -10px;
+    left: 7px;
+    background-color: black;
+    opacity: 0.8;
+    font-weight: bold;
+    color: #ECE6E6;
+    font-family: 'Roboto:400', sans-serif;
+}
+
+.sideVideo {
+    position: relative;
+    margin-top: 15px;
+    border-bottom: 1px solid lightgrey;
+}
+
+.sideImage {
+    width: 40%;
+    display: inline-block;
+    position: relative;
+}
+
+.sideDescr {
+    position: absolute;
+    vertical-align: center;
+    display: inline-block;
+    width: 59%;
+}
+
+.sideDescr h2 {
+    margin-left: 7px;
+    font-family: 'Roboto:300', sans-serif;
+    font-weight: bold;
+    font-size: 1em;
 }
 
 .sidebar img {
+    cursor: pointer;
     display: block;
     width: 100%;
     height: auto;
 }
+

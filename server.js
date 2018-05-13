@@ -12,10 +12,11 @@ app.use(bodyParser.urlencoded({
 
 
 // Init properties for our responses
-var firstVideo = '19';
+var firstVideo = '2';
 var allVideos = [];
 getVideoById(firstVideo);
 
+// Set current video by id and search for proposed videos
 async function getVideoById(vid_id) {
     var numOfProposed = 0;
     allVideos = [];
@@ -61,14 +62,15 @@ function shuffleArray(array) {
     }
 }
 
+// Request for current and proposed videos
 app.get('/get_all_videos', (req, res) => {
     res.send(allVideos);
 });
 
+// Request for changing current and proposed videos
 app.post('/set_all_videos', async function (req, res) {
-    await getVideoById(req.body.videooo); 
-    res.send(req.body);
-    
+    await getVideoById(req.body.vid_id); 
+    res.send(req.body);    
 });
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
