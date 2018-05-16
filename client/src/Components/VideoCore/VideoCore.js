@@ -1,88 +1,96 @@
-import React, { Component } from 'react';
-import "../../../node_modules/video-react/dist/video-react.css";
-import '../../App.css';
+import React, {Component} from 'react';
 import './VideoCore.css';
 import {Player} from 'video-react';
-import { Container, Row, Col } from 'reactstrap';
+import {Col, Container, Row} from 'reactstrap';
+
 
 class VideoCore extends Component {
-    constructor () {
+    constructor() {
         super();
         this.state = {
-            images: [],
-            currVid: {}
-         };
-    }
-
-    // Handler of click on posters of proposed videos
-    clickOnImage = async (vid_id) => {
-        await this.changeVidApi(vid_id)
-            .catch(err => console.log(err));
-        window.scrollTo(0, 0);
-        await this.getVidApi()
-            .catch(err => console.log(err));
-    }
-
-    componentDidMount = async () => {
-        await this.getVidApi()
-            .catch(err => console.log(err));
-    }
-
-    // Request for getting current and proposed videos from API
-    getVidApi = async () => {
-        const response = await fetch('/get_all_videos');
-        const body = await response.json();
-        if (response.status !== 200) throw Error(body.message);
-        await this.setState({ currVid: body.shift()});
-        var images = [];
-        for(let i = 0; i < 5; i++) {
-            images[i] = body.shift();
-            images[i].image = require('../../Image/' + images[i].img_path);
-        }
-        await this.setState({ images });
-        await this.setState(prevState => ({
-            currVid: {
-                ...prevState.currVid,
-                video: require('../../Video/' + this.state.currVid.video_path)}}));
-        return body;
+            initialVideoId: '2',
+            proposedVideos: [],
+            currentVideo: {}
+        };
     };
 
-    // Request for setting current and proposed videos on API
-    changeVidApi = async (video_id) => {
+    componentDidMount = () => {
+        this.getInitialVideo();
+    };
+
+    getInitialVideo = async () => {
+        await this.changeMainVideoAtApi(this.state.initialVideoId);
+
+        await this.getVideosFromApi();
+    };
+
+    clickOnProposedVideo = async (newVideoId) => {
+        await this.changeMainVideoAtApi(newVideoId);
+
+        window.scrollTo(0, 0);
+
+        await this.getVideosFromApi();
+    };
+
+    getVideosFromApi = async () => {
+        const response = await fetch('/get_all_videos');
+        const videosFromApi = await response.json();
+        if (response.status !== 200) throw Error(videosFromApi.message);
+        await this.setVideosAsState(videosFromApi);
+    };
+
+    changeMainVideoAtApi = async (newVideoId) => {
         const response = await fetch('/set_all_videos', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
                 'Content-Type': 'application/json',
-              },
-            body: JSON.stringify({vid_id: video_id})
+            },
+            body: JSON.stringify({newMainVideoId: newVideoId})
         });
-        const body = await response.json();
-        if (response.status !== 200) throw Error(body.message);
-        return body;
+
+        await response;
+    };
+
+    setVideosAsState = async (videosFromApi) => {
+        let newMainVideo = videosFromApi.shift();
+        newMainVideo.video = require('../../Video/' + newMainVideo.videoPath);
+        await this.setState({currentVideo: newMainVideo});
+
+        videosFromApi.forEach(video => {
+            video.image = require('../../Image/' + video.imagePath);
+        });
+        await this.setState({proposedVideos: videosFromApi});
+    };
+
+    renderProposedPosters = (posters) => {
+        return posters.map(poster => (
+            <div className="sideVideo">
+                <div className="sideImage">
+                    <img src={poster.image} onClick={this.clickOnProposedVideo.bind(this, poster.id)}></img>
+                    <p className="sideDuration">{poster.duration}</p>
+                </div>
+                <div className="sideDescr">
+                    <h2>{poster.name}</h2>
+                </div>
+            </div>
+        ))
     };
 
     render() {
+        const proposedPosters = this.renderProposedPosters(this.state.proposedVideos);
+
         return (
             <Container fluid>
                 <Row>
                     <Col xs={12} sm={12} md={8} lg={8} className="videoPart">
-                        <Player src={this.state.currVid.video}/>
-                        <h2>{this.state.currVid.name}</h2>
-                        <button className="downloadBtn"><a href={this.state.currVid.video} download><b>Download</b></a></button>
+                        <Player src={this.state.currentVideo.video}/>
+                        <h2>{this.state.currentVideo.name}</h2>
+                        <button className="downloadBtn"><a href={this.state.currentVideo.video} download><b>Download</b></a>
+                        </button>
                     </Col>
-                    <Col xs={12} sm={12} md={4} lg={4} className = "sidebar">
-                        {this.state.images.map(e => (
-                            <div className="sideVideo">
-                                <div className="sideImage">
-                                    <img src={e.image} onClick={this.clickOnImage.bind(this, e.id)}></img>
-                                    <p className="sideDuration">{e.duration}</p>
-                                </div>
-                                <div className="sideDescr">
-                                    <h2>{e.name}</h2>
-                                </div>
-                            </div>
-                        ))}
+                    <Col xs={12} sm={12} md={4} lg={4} className="sidePosters">
+                        {proposedPosters}
                     </Col>
                 </Row>
             </Container>

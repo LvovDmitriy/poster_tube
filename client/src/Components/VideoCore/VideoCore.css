@@ -16,11 +16,11 @@
     font-family: 'Roboto:400', sans-serif;
 }
 
-.sidebar {
+.sidePosters {
     font-family: 'Roboto:400', sans-serif;
 }
 
-.sidebar .sideDuration {
+.sidePosters .sideDuration {
     border-radius: 3px;
     font-size: 0.85em;
     position: absolute;
@@ -61,7 +61,7 @@
     font-size: 1em;
 }
 
-.sidebar img {
+.sidePosters img {
     cursor: pointer;
     display: block;
     width: 100%;

@@ -1,7 +1,9 @@
 const express = require('express');
-const app = express();
 const mysql = require('promise-mysql');
 const bodyParser = require('body-parser');
+const shuffleArray = require('shuffle-array');
+
+const app = express();
 
 const port = process.env.PORT || 5000;
 
@@ -10,67 +12,75 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
+let videosToClient = [];
 
-// Init properties for our responses
-var firstVideo = '2';
-var allVideos = [];
-getVideoById(firstVideo);
+// Set main video by id and search for proposed videos
+getMainAndProposedVideos = (newMainVideoId) => {
+    let numOfProposed = 1;
+    videosToClient = [];
 
-// Set current video by id and search for proposed videos
-async function getVideoById(vid_id) {
-    var numOfProposed = 0;
-    allVideos = [];
-    var connection;
     mysql.createConnection({
         host: 'localhost',
         user: 'root',
         password: '',
         database: 'poster'
-    }).then(function(conn){
-        connection = conn;
-        var sqlMainVid = 'SELECT * FROM video';
-        var result = connection.query(sqlMainVid, (err, result) => {
+    })
+    
+    .then((connection) => {
+        connection.query('SELECT * FROM video', (err, videosFromDB) => {
             if(err) {
                 throw err;
             } else {
-                allVideos[numOfProposed++] = result[vid_id - 1];
-                shuffleArray(result);
-                for(let i = 0; i < result.length; i++) {
-                    if((allVideos[0].category == result[i].category) && (result[i].id != vid_id))  {
-                        allVideos[numOfProposed++] = result[i];
-                    }
-                    if(numOfProposed >= 3) break;
-                }
-                for(let i = 0; i < result.length; i++) {
-                    if((allVideos[0].category != result[i].category))  {
-                        allVideos[numOfProposed++] = result[i];
-                    }
-                    if(numOfProposed >= 6) break;
-                }
+                // Setting new main video
+                videosToClient.push( videosFromDB[newMainVideoId - 1] );
+
+                // Shuffling array of videos for not choosing same videos each time
+                shuffleArray(videosFromDB);
+
+                // Getting 2 or less videos with same category 
+                let videosWithSameCategory = chooseVideosFromSameCategory(videosToClient[0], videosFromDB);
+                videosWithSameCategory.forEach(video => {
+                    videosToClient.push(video);
+                });
+
+                // Getting 3 or more videos from other categories so that we have 6 videos to send at all
+                let videosWithDifferentCategory = chooseVideosFromDifferentCategory(videosToClient[0], 
+                    videosFromDB, videosToClient.length);
+                    videosWithDifferentCategory.forEach(video => {
+                    videosToClient.push(video);
+                });
             }
         });
+
         connection.end();
     });
+};
 
+chooseVideosFromSameCategory = (newMainVideo, videosFromDB) => {
+    let videosWithSameCategory = videosFromDB.filter((video) => {
+        return (video.category === newMainVideo.category && video.id !== newMainVideo.id);
+    });
+    return videosWithSameCategory.slice(0, 2);
+};
 
-}
+chooseVideosFromDifferentCategory = (newMainVideo, videosFromDB, numberOfChosenVideos) => {
+    let numberOfVideosToAdd = 6 - numberOfChosenVideos;
 
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        let j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-}
+    let videosWithDifferentCategory = videosFromDB.filter((video) => {
+        return (video.category !== newMainVideo.category);
+    });
+    return videosWithDifferentCategory.slice(0, numberOfVideosToAdd);
+};
 
-// Request for current and proposed videos
-app.get('/get_all_videos', (req, res) => {
-    res.send(allVideos);
+// Request for main and proposed videos
+app.get('/get_all_videos', (request, result) => {
+    result.send(videosToClient);
 });
 
-// Request for changing current and proposed videos
-app.post('/set_all_videos', async function (req, res) {
-    await getVideoById(req.body.vid_id); 
-    res.send(req.body);    
+// Request for changing main and proposed videos
+app.post('/set_all_videos', async (request, result) => {
+    await getMainAndProposedVideos(request.body.newMainVideoId); 
+    result.send(request.body);    
 });
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
