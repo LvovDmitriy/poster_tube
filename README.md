@@ -1,4 +1,5 @@
-Link: http://31.131.25.79:3000/
+Link: https://postertube.ml/
+Direct link: http://31.131.25.79:3000/
 
 This projects has been created via ReactJS on the client side, server side was made using Node.JS. Adaptability was realized by using CSS framework Bootstrap, video player was made by using ReactJS component "video-react".
 
